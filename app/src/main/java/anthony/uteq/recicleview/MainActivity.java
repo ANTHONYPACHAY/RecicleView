@@ -49,17 +49,21 @@ public class MainActivity extends AppCompatActivity {
         //recyclerview del activity main
         recView = findViewById(R.id.idlistview);
     }
+
     private void setValues(List<SuperItem> data){
         //para indicar la posición del poblamiento de los datos {lista o celda}
         //para celdas usariamos gridLayoutManager
         LinearLayoutManager manager = new LinearLayoutManager(MainActivity.this);
         recView.setLayoutManager(manager);
+        //HeaderDecoration headerDecoration = new HeaderDecoration(/* init */);
+        //recView.addItemDecoration(headerDecoration);
         //asignar información
         elements = data;
         //agrega los elementos al adaptador
         adapter = new MyCardAdapter(MainActivity.this,elements);
         //ubicar adaptador
         recView.setAdapter(adapter);
+        //recView.addItemDecoration(new StartOffsetItemDecoration(10));
     }
 
     private List<SuperItem> embebedData(){
@@ -75,8 +79,8 @@ public class MainActivity extends AppCompatActivity {
         return data;
     }
     private void getDataVolley(){
+        //Obtención de datos del web service utilzando Volley
         queue = Volley.newRequestQueue(this);
-
         StringRequest request = new StringRequest(
                 Request.Method.GET,
                 "https://revistas.uteq.edu.ec/ws/issues.php?j_id=2",
@@ -84,7 +88,9 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(String response) {
                         MyLogs.info("ws todo bien");
+                        //Procesar las respuesta y armar un Array con estos
                         List<SuperItem> data = processResponse(response.toString());
+                        //método para mostrar los datos en el activity
                         setValues(data);
                     }
                 },
@@ -105,19 +111,30 @@ public class MainActivity extends AppCompatActivity {
     }
     private List<SuperItem> processResponse(String response){
         List<SuperItem> data = new ArrayList<>();
+        Gson gson = new Gson();//convertidor de jsonObjecto a Object.class
+        //Convertir el string de respuesta(con formato JsonArray) en un JsonArray
         JsonArray jarr = Methods.stringToJsonArray(response);
+        //validar cantidad de elementos, para informar en caso de no encontrar alguno
         if(jarr.size() > 0){
+            //recorrer los items
             for(int ind = 0; ind <jarr.size(); ind++) {
+                //convertir el elemento del json en jsonObject(por defecto los items dentro de
+                // JsonArray son de tipo JsonElement)
                 JsonObject jso = Methods.JsonElementToJSO(jarr.get(ind));
+                //Verificar cantidad de keys dentor del json (si hay 0 lo mas probable es que haya
+                // ocurrido algún problema durante la conversión de JsonElement a JsonObject)
                 if(jso.size() > 0) {
-                    Gson gson = new Gson();
+                    //Casteo de JsonObject s Java.class (en este caso SuperItem)
                     SuperItem item = gson.fromJson(jso.toString(), SuperItem.class);
+                    //agrega el item a la lista
                     data.add(item);
                 }
             }
         }else{
+            //Toast indicando la ausencia de elementos
             MessageToast("No hay registros.");
         }
+        //retorno de la lista con todos los elementos
         return data;
     }
 }
