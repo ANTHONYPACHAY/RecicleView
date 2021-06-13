@@ -6,6 +6,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
 import android.view.Gravity;
+import android.view.View;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LayoutAnimationController;
 import android.widget.Toast;
 
 import com.android.volley.NetworkResponse;
@@ -136,5 +139,15 @@ public class MainActivity extends AppCompatActivity {
         }
         //retorno de la lista con todos los elementos
         return data;
+    }
+    private void runAnimationAgain() {
+
+        final LayoutAnimationController controller =
+                AnimationUtils.loadLayoutAnimation(this, R.anim.layout_animation_right_to_left);
+
+        recView.setLayoutAnimation(controller);
+        adapter.notifyDataSetChanged();
+        recView.scheduleLayoutAnimation();
+
     }
 }
